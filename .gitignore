@@ -1,0 +1,17 @@
+.DS_Store
+*~
+/.classpath
+/.gradle
+/.project
+/.settings
+/bin
+/build
+/target
+\#*\#
+/.apt_generated/
+/.checkstyle
+/bin/
+/build/
+/target/
+/src/main/checkstyle/checkstyle.xml
+/src/test/checkstyle/checkstyle.xml
