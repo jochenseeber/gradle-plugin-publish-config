@@ -25,6 +25,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package me.seeber.gradle.distribution.gradle;
 
 import org.gradle.api.Task;
@@ -38,7 +39,9 @@ import org.gradle.model.RuleSource;
 import org.gradle.model.internal.core.Hidden;
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension;
 
+import com.google.common.base.Strings;
 import com.gradle.publish.PluginBundleExtension;
+import com.gradle.publish.PluginConfig;
 import com.gradle.publish.PublishPlugin;
 
 import me.seeber.gradle.distribution.gradle.GradlePluginPublishConfigPlugin.PluginRules.JavaPluginRules;
@@ -82,6 +85,12 @@ public class GradlePluginPublishConfigPlugin extends AbstractProjectConfigPlugin
             bundleExtension.setDescription(project.getDescription());
             bundleExtension.setWebsite(projectConfig.getWebsiteUrl());
             bundleExtension.setVcsUrl(projectConfig.getRepository().getWebsiteUrl());
+
+            for (PluginConfig plugin : bundleExtension.getPlugins()) {
+                if (Strings.isNullOrEmpty(plugin.getDisplayName())) {
+                    plugin.setDisplayName(project.getDescription());
+                }
+            }
         }
 
         /**
@@ -104,7 +113,7 @@ public class GradlePluginPublishConfigPlugin extends AbstractProjectConfigPlugin
         }
 
         /**
-         * Rules for Java based blugins
+         * Rules for Java based plugins
          */
         public static class JavaPluginRules extends RuleSource {
             /**
