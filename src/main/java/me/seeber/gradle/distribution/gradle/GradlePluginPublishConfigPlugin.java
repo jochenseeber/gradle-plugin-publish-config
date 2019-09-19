@@ -1,30 +1,30 @@
 /**
- * BSD 2-Clause License
- *
- * Copyright (c) 2016-2017, Jochen Seeber
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+* BSD 2-Clause License
+*
+* Copyright (c) 2016-2017, Jochen Seeber
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+* * Redistributions of source code must retain the above copyright notice, this
+* list of conditions and the following disclaimer.
+*
+* * Redistributions in binary form must reproduce the above copyright notice,
+* this list of conditions and the following disclaimer in the documentation
+* and/or other materials provided with the distribution.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 package me.seeber.gradle.distribution.gradle;
 
@@ -44,7 +44,6 @@ import com.gradle.publish.PluginBundleExtension;
 import com.gradle.publish.PluginConfig;
 import com.gradle.publish.PublishPlugin;
 
-import me.seeber.gradle.distribution.gradle.GradlePluginPublishConfigPlugin.PluginRules.JavaPluginRules;
 import me.seeber.gradle.plugin.AbstractProjectConfigPlugin;
 import me.seeber.gradle.project.base.ProjectConfig;
 import me.seeber.gradle.project.base.ProjectConfigPlugin;
@@ -73,11 +72,21 @@ public class GradlePluginPublishConfigPlugin extends AbstractProjectConfigPlugin
         }
 
         /**
+         * Initialize the Gradle plugin extension
+         *
+         * @param pluginExtension Gradle plugin extension to initialize
+         */
+        @Defaults
+        public void initializeGradlePluginDevelopmentExtension(GradlePluginDevelopmentExtension pluginExtension) {
+            pluginExtension.setAutomatedPublishing(false);
+        }
+
+        /**
          * Initialize the plugin bundle extension
          *
          * @param bundleExtension Plugin bundle extension to initialize
-         * @param projectConfig Project configuration
-         * @param project Project context
+         * @param projectConfig   Project configuration
+         * @param project         Project context
          */
         @Defaults
         public void configureGradlePluginDevelopmentExtension(PluginBundleExtension bundleExtension,
@@ -101,31 +110,12 @@ public class GradlePluginPublishConfigPlugin extends AbstractProjectConfigPlugin
          * </ul>
          *
          * @param task Task to configure
-         * @param pluginExtension Plugin development extension
-         * @param bundleExtension Plugin bundle extension
          */
         @Mutate
-        public void configureTasks(@Each Task task, GradlePluginDevelopmentExtension pluginExtension,
-                PluginBundleExtension bundleExtension) {
+        public void configureTasks(@Each Task task) {
             if (task.getName().equals("eclipse")) {
                 task.dependsOn("pluginUnderTestMetadata");
             }
-        }
-
-        /**
-         * Rules for Java based plugins
-         */
-        public static class JavaPluginRules extends RuleSource {
-            /**
-             * Initialize the plugin development extension
-             *
-             * @param pluginExtension Plugin development extension
-             */
-            @Defaults
-            public void initializeGradlePluginDevelopmentExtension(GradlePluginDevelopmentExtension pluginExtension) {
-                pluginExtension.setAutomatedPublishing(false);
-            }
-
         }
     }
 
@@ -145,10 +135,6 @@ public class GradlePluginPublishConfigPlugin extends AbstractProjectConfigPlugin
     public void initialize() {
         getProject().getPluginManager().apply(ProjectConfigPlugin.class);
         getProject().getPluginManager().apply(PublishPlugin.class);
-
-        getProject().getPluginManager().withPlugin("org.gradle.java-gradle-plugin", p -> {
-            getProject().getPluginManager().apply(JavaPluginRules.class);
-        });
 
         DependencyHandler dependencies = getProject().getDependencies();
         dependencies.add("compile", dependencies.gradleApi());
