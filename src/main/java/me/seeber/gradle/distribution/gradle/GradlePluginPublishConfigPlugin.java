@@ -30,6 +30,7 @@ package me.seeber.gradle.distribution.gradle;
 
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.model.Defaults;
 import org.gradle.model.Each;
@@ -62,8 +63,8 @@ public class GradlePluginPublishConfigPlugin extends AbstractProjectConfigPlugin
         /**
          * Provide the plugin bundle extension from the Plugin Publishing Plugin
          *
-         * @param extensions Extension container to get extension
-         * @return Plugin bundle extension
+         * @param  extensions Extension container to get extension
+         * @return            Plugin bundle extension
          */
         @Model
         @Hidden
@@ -89,8 +90,8 @@ public class GradlePluginPublishConfigPlugin extends AbstractProjectConfigPlugin
          * @param project         Project context
          */
         @Defaults
-        public void configureGradlePluginDevelopmentExtension(PluginBundleExtension bundleExtension,
-                ProjectConfig projectConfig, ProjectContext project) {
+        public void initializePluginBundleExtension(PluginBundleExtension bundleExtension, ProjectConfig projectConfig,
+                ProjectContext project) {
             bundleExtension.setDescription(project.getDescription());
             bundleExtension.setWebsite(projectConfig.getWebsiteUrl());
             bundleExtension.setVcsUrl(projectConfig.getRepository().getWebsiteUrl());
@@ -122,10 +123,6 @@ public class GradlePluginPublishConfigPlugin extends AbstractProjectConfigPlugin
     /**
      * <ul>
      * <li>Apply Project Config Plugin
-     * <li>Apply Java Config Plugin
-     * <li>Apply Groovy Config Plugin
-     * <li>Apply Java Config Plugin
-     * <li>Apply Java Gradle Plugin Plugin
      * <li>Apply Plugin Publishing Plugin
      * </ul>
      *
@@ -135,6 +132,11 @@ public class GradlePluginPublishConfigPlugin extends AbstractProjectConfigPlugin
     public void initialize() {
         getProject().getPluginManager().apply(ProjectConfigPlugin.class);
         getProject().getPluginManager().apply(PublishPlugin.class);
+
+        getProject().afterEvaluate(p -> {
+            // Force realization of the Gradle plugin configuration
+            ((ProjectInternal) p).getModelRegistry().realize("pluginBundleExtension", PluginBundleExtension.class);
+        });
 
         DependencyHandler dependencies = getProject().getDependencies();
         dependencies.add("compile", dependencies.gradleApi());
